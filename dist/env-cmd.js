@@ -48,14 +48,6 @@ async function EnvCmd({ command, commandArgs, envFile, rc, options = {} }) {
             throw e;
         }
     }
-    // Override the merge order if --no-override flag set
-    if (options.noOverride === true) {
-        env = Object.assign({}, env, process.env);
-    }
-    else {
-        // Add in the system environment variables to our environment list
-        env = Object.assign({}, process.env, env);
-    }
     /** ENVKEY START */
     if (!('ENVKEY' in env)) {
         if (options.verbose === true) {
@@ -67,8 +59,17 @@ async function EnvCmd({ command, commandArgs, envFile, rc, options = {} }) {
         const envDownloaded = envKeyFetch(env.ENVKEY);
         env = Object.assign(Object.assign({}, envDownloaded), env);
         delete env.ENVKEY;
+        env.ENVKEY_KEYS = Object.keys(env).join(",");
     }
     /** ENVKEY END */
+    // Override the merge order if --no-override flag set
+    if (options.noOverride === true) {
+        env = Object.assign({}, env, process.env);
+    }
+    else {
+        // Add in the system environment variables to our environment list
+        env = Object.assign({}, process.env, env);
+    }
     if (options.expandEnvs === true) {
         command = expand_envs_1.expandEnvs(command, env);
         commandArgs = commandArgs.map(arg => expand_envs_1.expandEnvs(arg, env));

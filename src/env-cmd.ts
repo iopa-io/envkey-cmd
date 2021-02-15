@@ -5,10 +5,8 @@ import { parseArgs } from './parse-args'
 import { getEnvVars } from './get-env-vars'
 import { expandEnvs } from './expand-envs'
 
-/** ENVKEY START */
 // eslint-disable-next-line
 const { fetch: envKeyFetch } = require('envkey/loader')
-/** ENVKEY END */
 
 /**
  * Executes env - cmd using command line arguments
@@ -55,6 +53,19 @@ export async function EnvCmd (
     }
   }
 
+  const ENVKEY = process.env.ENVKEY || env.ENVKEY || null
+  if (ENVKEY === null) {
+    if (options.verbose === true) {
+      console.info('Failed to find ENVKEY inside secrets file')
+    }
+  } else {
+    const envDownloaded = envKeyFetch(ENVKEY)
+
+    env = { ...envDownloaded, ...env }
+
+    env.ENVKEY_KEYS = Object.keys(env).join(",")
+  }
+
   // Override the merge order if --no-override flag set
   if (options.noOverride === true) {
     env = Object.assign({}, env, process.env)
@@ -63,20 +74,7 @@ export async function EnvCmd (
     env = Object.assign({}, process.env, env)
   }
 
-  /** ENVKEY START */
-  if (!('ENVKEY' in env)) {
-    if (options.verbose === true) {
-      console.info('Failed to ENVKEY inside secrets file')
-    }
-    // throw new Error('Failed to ENVKEY inside secrets file')
-  } else {
-    const envDownloaded = envKeyFetch(env.ENVKEY)
-
-    env = { ...envDownloaded, ...env }
-
-    delete env.ENVKEY
-  }
-  /** ENVKEY END */
+  delete env.ENVKEY
 
   if (options.expandEnvs === true) {
     command = expandEnvs(command, env)
