@@ -1,10 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EnvCmd = exports.CLI = void 0;
 const spawn_1 = require("./spawn");
 const signal_termination_1 = require("./signal-termination");
 const parse_args_1 = require("./parse-args");
 const get_env_vars_1 = require("./get-env-vars");
 const expand_envs_1 = require("./expand-envs");
+/** ENVKEY START */
+// eslint-disable-next-line
+const { fetch: envKeyFetch } = require('envkey/loader');
+/** ENVKEY END */
 /**
  * Executes env - cmd using command line arguments
  * @export
@@ -51,6 +56,19 @@ async function EnvCmd({ command, commandArgs, envFile, rc, options = {} }) {
         // Add in the system environment variables to our environment list
         env = Object.assign({}, process.env, env);
     }
+    /** ENVKEY START */
+    if (!('ENVKEY' in env)) {
+        if (options.verbose === true) {
+            console.info('Failed to ENVKEY inside secrets file');
+        }
+        // throw new Error('Failed to ENVKEY inside secrets file')
+    }
+    else {
+        const envDownloaded = envKeyFetch(env.ENVKEY);
+        env = Object.assign(Object.assign({}, envDownloaded), env);
+        delete env.ENVKEY;
+    }
+    /** ENVKEY END */
     if (options.expandEnvs === true) {
         command = expand_envs_1.expandEnvs(command, env);
         commandArgs = commandArgs.map(arg => expand_envs_1.expandEnvs(arg, env));

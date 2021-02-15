@@ -1,19 +1,21 @@
-[![Linux Tests](https://github.com/toddbluhm/env-cmd/workflows/linux%20tests/badge.svg)](https://github.com/toddbluhm/env-cmd/actions?query=workflow%3A%22linux%20tests%22)
-[![Windows Tests](https://github.com/toddbluhm/env-cmd/workflows/windows%20tests/badge.svg)](https://github.com/toddbluhm/env-cmd/actions?query=workflow%3A%22windows%20tests%22)
-[![Coverage Status](https://badgen.net/coveralls/c/github/toddbluhm/env-cmd)](https://coveralls.io/github/toddbluhm/env-cmd?branch=master)
-[![npm](https://badgen.net/npm/v/env-cmd)](https://www.npmjs.com/package/env-cmd)
-[![npm](https://badgen.net/npm/dm/env-cmd)](https://www.npmjs.com/package/env-cmd)
-[![License](https://badgen.net/github/license/toddbluhm/env-cmd)](https://github.com/toddbluhm/env-cmd/blob/master/LICENSE)
+[![Linux Tests](https://github.com/toddbluhm/envkey-cmd/workflows/linux%20tests/badge.svg)](https://github.com/toddbluhm/envkey-cmd/actions?query=workflow%3A%22linux%20tests%22)
+[![Windows Tests](https://github.com/toddbluhm/envkey-cmd/workflows/windows%20tests/badge.svg)](https://github.com/toddbluhm/envkey-cmd/actions?query=workflow%3A%22windows%20tests%22)
+[![Coverage Status](https://badgen.net/coveralls/c/github/toddbluhm/envkey-cmd)](https://coveralls.io/github/toddbluhm/envkey-cmd?branch=master)
+[![npm](https://badgen.net/npm/v/envkey-cmd)](https://www.npmjs.com/package/envkey-cmd)
+[![npm](https://badgen.net/npm/dm/envkey-cmd)](https://www.npmjs.com/package/envkey-cmd)
+[![License](https://badgen.net/github/license/toddbluhm/envkey-cmd)](https://github.com/toddbluhm/envkey-cmd/blob/master/LICENSE)
 [![TS-Standard - Typescript Standard Style Guide](https://badgen.net/badge/code%20style/ts-standard/blue?icon=typescript)](https://github.com/toddbluhm/ts-standard)
-[![Dependabot badge](https://badgen.net/dependabot/toddbluhm/env-cmd?icon=dependabot)](https://dependabot.com/)
+[![Dependabot badge](https://badgen.net/dependabot/toddbluhm/envkey-cmd?icon=dependabot)](https://dependabot.com/)
 
-# env-cmd
+# envkey-cmd
 
 A simple node program for executing commands using an environment from an env file.
 
+This is a simple wrapper around ['envkey'](https://www.npmjs.com/package/envkey) with all the logic from ['env-cmd'](https://github.com/toddbluhm/env-cmd)
+
 ## 💾 Install
 
-`npm install env-cmd` or `npm install -g env-cmd`
+`npm install envkey-cmd` or `npm install -g envkey-cmd`
 
 ## ⌨️ Basic Usage
 
@@ -21,6 +23,7 @@ A simple node program for executing commands using an environment from an env fi
 
 ```text
 # This is a comment
+ENVKEY=wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-staging.envkey.com
 ENV1=THANKS
 ENV2=FOR ALL
 ENV3=THE FISH
@@ -31,7 +34,7 @@ ENV3=THE FISH
 ```json
 {
   "scripts": {
-    "test": "env-cmd mocha -R spec"
+    "test": "envkey-cmd mocha -R spec"
   }
 }
 ```
@@ -39,7 +42,7 @@ ENV3=THE FISH
 **Terminal**
 
 ```sh
-./node_modules/.bin/env-cmd node index.js
+./node_modules/.bin/envkey-cmd node index.js
 ```
 
 ### Using custom env file path
@@ -49,7 +52,7 @@ To use a custom env filename or path, pass the `-f` flag. This is a major breaki
 **Terminal**
 
 ```sh
-./node_modules/.bin/env-cmd -f ./custom/path/.env node index.js
+./node_modules/.bin/envkey-cmd -f ./custom/path/.env node index.js
 ```
 
 ## 📜 Help
@@ -64,7 +67,7 @@ Options:
   --fallback                          Fallback to default env file path, if custom env file path not found
   --no-override                       Do not override existing environment variables
   -r, --rc-file [path]                Custom rc file path (default path: ./.env-cmdrc(|.js|.json)
-  --silent                            Ignore any env-cmd errors and only fail on executed program failure.
+  --silent                            Ignore any envkey-cmd errors and only fail on executed program failure.
   --use-shell                         Execute the command in a new shell with the given environment
   --verbose                           Print helpful debugging information
   -x, --expand-envs                   Replace $var in args and command with environment variables
@@ -75,25 +78,28 @@ Options:
 
 ### `.rc` file usage
 
-For more complex projects, a `.env-cmdrc` file can be defined in the root directory and supports
+For more complex projects, a `.envkey-cmdrc` file can be defined in the root directory and supports
 as many environments as you want. Simply use the `-e` flag and provide which environments you wish to
 use from the `.env-cmdrc` file. Using multiple environment names will merge the environment variables
 together. Later environments overwrite earlier ones in the list if conflicting environment variables
 are found.
 
-**.rc file `./.env-cmdrc`**
+**.rc file `./.envkey-cmdrc`**
 
 ```json
 {
   "development": {
+    "ENVKEY": "wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-development.envkey.com",
     "ENV1": "Thanks",
     "ENV2": "For All"
   },
   "test": {
+    "ENVKEY": "sdfsfsfsdfsdf-3w1kwyF35nRYwsAJ-env-test.envkey.com",
     "ENV1": "No Thanks",
     "ENV3": "!"
   },
   "production": {
+    "ENVKEY": "wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-production.envkey.com",
     "ENV1": "The Fish"
   }
 }
@@ -102,10 +108,10 @@ are found.
 **Terminal**
 
 ```sh
-./node_modules/.bin/env-cmd -e production node index.js
+./node_modules/.bin/envkey-cmd -e production node index.js
 # Or for multiple environments (where `production` vars override `test` vars,
 # but both are included)
-./node_modules/.bin/env-cmd -e test,production node index.js
+./node_modules/.bin/envkey-cmd -e test,production node index.js
 ```
 
 ### `--no-override` option
@@ -126,12 +132,12 @@ commands together that share the same environment variables.
 **Terminal**
 
 ```sh
-./node_modules/.bin/env-cmd -f ./test/.env --use-shell "npm run lint && npm test"
+./node_modules/.bin/envkey-cmd -f ./test/.env --use-shell "npm run lint && npm test"
 ```
 
 ### Asynchronous env file support
    
-   EnvCmd supports reading from asynchronous `.env` files. Instead of using a `.env` file, pass in a `.js`
+   EnvKeyCmd supports reading from asynchronous `.env` files. Instead of using a `.env` file, pass in a `.js`
    file that exports either an object or a `Promise` resolving to an object (`{ ENV_VAR_NAME: value, ... }`). Asynchronous `.rc`
    files are also supported using `.js` file extension and resolving to an object with top level environment
    names (`{ production: { ENV_VAR_NAME: value, ... } }`).
@@ -139,38 +145,38 @@ commands together that share the same environment variables.
    **Terminal**
    
    ```sh
-   ./node_modules/.bin/env-cmd -f ./async-file.js node index.js
+   ./node_modules/.bin/envkey-cmd -f ./async-file.js node index.js
    ```
 
 ### `-x` expands vars in arguments
 
-EnvCmd supports expanding `$var` values passed in as arguments to the command. The allows a user
+EnvKeyCmd supports expanding `$var` values passed in as arguments to the command. The allows a user
 to provide arguments to a command that are based on environment variable values at runtime.
 
-**NOTE:** You must escape the `$` character with `\` or your terminal might try to auto expand it before passing it to `env-cmd`.
+**NOTE:** You must escape the `$` character with `\` or your terminal might try to auto expand it before passing it to `envkey-cmd`.
 
 **Terminal**
 
 ```sh
 # $VAR will be expanded into the env value it contains at runtime
-./node_modules/.bin/env-cmd -x node index.js --arg=\$VAR
+./node_modules/.bin/envkey-cmd -x node index.js --arg=\$VAR
 ```
 
 or in `package.json` (use `\\` to insert a literal backslash)
 ```json
 {
   "script": {
-    "start": "env-cmd -x node index.js --arg=\\$VAR"
+    "start": "envkey-cmd -x node index.js --arg=\\$VAR"
   }
 }
 ```
 
 
-### `--silent` suppresses env-cmd errors
+### `--silent` suppresses envkey-cmd errors
 
-EnvCmd supports the `--silent` flag the suppresses all errors generated by `env-cmd`
+EnvKeyCmd supports the `--silent` flag the suppresses all errors generated by `envkey-cmd`
 while leaving errors generated by the child process and cli signals still usable. This
-flag is primarily used to allow `env-cmd` to run in environments where the `.env`
+flag is primarily used to allow `envkey-cmd` to run in environments where the `.env`
 file might not be present, but still execute the child process without failing
 due to a missing file.
 
@@ -178,7 +184,7 @@ due to a missing file.
 ## 💿 Examples
 
 You can find examples of how to use the various options above by visiting
-the examples repo [env-cmd-examples](https://github.com/toddbluhm/env-cmd-examples).
+the examples repo [envkey-cmd-examples](https://github.com/toddbluhm/envkey-cmd-examples).
 
 ## 💽️ Environment File Formats
 
@@ -207,7 +213,7 @@ Working Directory = `/Users/test/Development/app`
 
 ## 🛠 API Usage
 
-### `EnvCmd`
+### `EnvKeyCmd`
 
 A function that executes a given command in a new child process with the given environment and options
 
@@ -223,7 +229,7 @@ A function that executes a given command in a new child process with the given e
   - **`options`** { `object` }
     - **`expandEnvs`** { `boolean` }: Expand `$var` values passed to `commandArgs` (default: `false`)
     - **`noOverride`** { `boolean` }: Prevent `.env` file vars from overriding existing `process.env` vars (default: `false`)
-    - **`silent`** { `boolean` }: Ignore any errors thrown by env-cmd, used to ignore missing file errors (default: `false`)
+    - **`silent`** { `boolean` }: Ignore any errors thrown by envkey-cmd, used to ignore missing file errors (default: `false`)
     - **`useShell`** { `boolean` }: Runs command inside a new shell instance (default: `false`)
     - **`verbose`** { `boolean` }: Prints extra debug logs to `console.info` (default: `false`)
   - **Returns** { `Promise<object>` }: key is env var name and value is the env var value
@@ -251,16 +257,17 @@ usually just easier to have a file with all the vars in them, especially for dev
 
 ## 🧬 Related Projects
 
+[`env-cmd`](https://github.com/toddbluhm/env-cmd) - Original source without ENVKEY
 [`cross-env`](https://github.com/kentcdodds/cross-env) - Cross platform setting of environment scripts
 
 ## 🎊 Special Thanks
 
-Special thanks to [`cross-env`](https://github.com/kentcdodds/cross-env) for inspiration (uses the
+Special thanks to [`env-cmd`](https://github.com/toddbluhm/env-cmd) for all the hard work and [`cross-env`](https://github.com/kentcdodds/cross-env) for inspiration (uses the
 same `cross-spawn` lib underneath too).
 
 ## 📋 Contributing Guide
 
-I welcome all pull requests. Please make sure you add appropriate test cases for any features
+ Please make sure you add appropriate test cases for any features
 added. Before opening a PR please make sure to run the following scripts:
 
 - `npm run lint` checks for code errors and format according to [ts-standard](https://github.com/toddbluhm/ts-standard)

@@ -74,7 +74,7 @@ describe('EnvCmd', (): void => {
   })
 
   it('should parse the provided args and execute the EnvCmd', async (): Promise<void> => {
-    getEnvVarsStub.returns({ BOB: 'test' })
+    getEnvVarsStub.returns({ BOB: 'test', ENVKEY: 'wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-staging.envkey.com' })
     await envCmdLib.EnvCmd({
       command: 'node',
       commandArgs: ['-v'],
@@ -94,7 +94,10 @@ describe('EnvCmd', (): void => {
   it('should override existing env vars if noOverride option is false/missing',
     async (): Promise<void> => {
       process.env.BOB = 'cool'
-      getEnvVarsStub.returns({ BOB: 'test' })
+      getEnvVarsStub.returns({
+        BOB: 'test',
+        ENVKEY: 'wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-staging.envkey.com'
+      })
       await envCmdLib.EnvCmd({
         command: 'node',
         commandArgs: ['-v'],
@@ -110,12 +113,15 @@ describe('EnvCmd', (): void => {
       assert.equal(getEnvVarsStub.callCount, 1)
       assert.equal(spawnStub.callCount, 1)
       assert.equal(spawnStub.args[0][2].env.BOB, 'test')
+      assert.equal(spawnStub.args[0][2].env.TEST, 'it')
+      assert.equal(spawnStub.args[0][2].env.TEST_2, 'works!')
     }
   )
 
   it('should not override existing env vars if noOverride option is true',
     async (): Promise<void> => {
       process.env.BOB = 'cool'
+      process.env.ENVKEY = 'wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-staging.envkey.com'
       getEnvVarsStub.returns({ BOB: 'test' })
       await envCmdLib.EnvCmd({
         command: 'node',
@@ -135,6 +141,8 @@ describe('EnvCmd', (): void => {
       assert.equal(getEnvVarsStub.callCount, 1)
       assert.equal(spawnStub.callCount, 1)
       assert.equal(spawnStub.args[0][2].env.BOB, 'cool')
+      assert.equal(spawnStub.args[0][2].env.TEST, 'it')
+      assert.equal(spawnStub.args[0][2].env.TEST_2, 'works!')
     }
   )
 

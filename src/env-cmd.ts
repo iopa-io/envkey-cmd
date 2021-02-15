@@ -5,6 +5,11 @@ import { parseArgs } from './parse-args'
 import { getEnvVars } from './get-env-vars'
 import { expandEnvs } from './expand-envs'
 
+/** ENVKEY START */
+// eslint-disable-next-line
+const { fetch: envKeyFetch } = require('envkey/loader')
+/** ENVKEY END */
+
 /**
  * Executes env - cmd using command line arguments
  * @export
@@ -49,6 +54,7 @@ export async function EnvCmd (
       throw e
     }
   }
+
   // Override the merge order if --no-override flag set
   if (options.noOverride === true) {
     env = Object.assign({}, env, process.env)
@@ -56,6 +62,21 @@ export async function EnvCmd (
     // Add in the system environment variables to our environment list
     env = Object.assign({}, process.env, env)
   }
+
+  /** ENVKEY START */
+  if (!('ENVKEY' in env)) {
+    if (options.verbose === true) {
+      console.info('Failed to ENVKEY inside secrets file')
+    }
+    // throw new Error('Failed to ENVKEY inside secrets file')
+  } else {
+    const envDownloaded = envKeyFetch(env.ENVKEY)
+
+    env = { ...envDownloaded, ...env }
+
+    delete env.ENVKEY
+  }
+  /** ENVKEY END */
 
   if (options.expandEnvs === true) {
     command = expandEnvs(command, env)

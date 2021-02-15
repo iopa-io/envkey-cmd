@@ -1,14 +1,14 @@
 {
-  "name": "env-cmd",
+  "name": "envkey-cmd",
   "version": "10.1.0",
-  "description": "Executes a command using the environment variables in an env file",
+  "description": "Executes a command using the environment variables from an ENVKEY in an env file",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "engines": {
     "node": ">=8.0.0"
   },
   "bin": {
-    "env-cmd": "bin/env-cmd.js"
+    "envkey-cmd": "bin/env-cmd.js"
   },
   "scripts": {
     "test": "mocha -r ts-node/register ./test/**/*.ts",
@@ -39,7 +39,8 @@
     "Eric Lanehart <eric@pushred.co>",
     "Jon Scheiding <jonscheiding@gmail.com>",
     "serapath (Alexander Praetorius) <dev@serapath.de>",
-    "Anton Versal <ant.ver@gmail.com>"
+    "Anton Versal <ant.ver@gmail.com>",
+    "Guy Barnard <guy@iopa.io"
   ],
   "license": "MIT",
   "bugs": {
@@ -48,7 +49,8 @@
   "homepage": "https://github.com/toddbluhm/env-cmd#readme",
   "dependencies": {
     "commander": "^5.0.0",
-    "cross-spawn": "^7.0.0"
+    "cross-spawn": "^7.0.0",
+    "envkey": "^1.2.9"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.0.0",
