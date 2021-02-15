@@ -1,6 +1,6 @@
 {
   "name": "envkey-cmd",
-  "version": "10.1.1",
+  "version": "10.1.2",
   "description": "Executes a command using the environment variables from an ENVKEY in an env file",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
