@@ -1,5 +1,9 @@
 # Changelog
 
+## 10.1.5 - Initial release for ENVKEY
+
+- **Feature**: Supports ENVKEY in environment or command line and downloads from envkey.com
+
 ## 10.1.1 - In Development
 
 - **Upgrade**: Upgraded dependency `commander` to `5.x`
@@ -9,7 +13,7 @@
 
 - **Feature**: Added support for expanding vars using the `-x` flag.
 Note: only supports `$var` syntax
-- **Feature**: Added support for `--silent` flag that ignores env-cmd errors and missing files and 
+- **Feature**: Added support for `--silent` flag that ignores envkey-cmd errors and missing files and 
 only terminates on caught signals
 - **Feature**: Added a new `--verbose` flag that prints additional debugging info to `console.info`
 - **Upgrade**: Upgraded dependency `commander` to `4.x`
@@ -19,7 +23,7 @@ only terminates on caught signals
 ## 10.0.1
 
 - **Fix**: Fixed bug introduced by strict equal checking for `undefined` when the value was `null`. This
-bug caused most executions of `env-cmd` to fail with an error, when in fact no error had occurred.
+bug caused most executions of `envkey-cmd` to fail with an error, when in fact no error had occurred.
 
 ## 10.0.0
 
@@ -86,7 +90,7 @@ node version that is less than `4.0.0`.*
 - **Feature**: Added `--fallback` option to allow for falling back to the default `.env` file if the provided `.env` file is not found.
 - **Feature**: Added ability to select multiple environments from the `.env-cmdrc` file. The environments override each other like this:
 `development,production` where `production` vars override `development` vars if they share the same vars.
-- **Bug**: `env-cmd` no longer crashes when it cannot find the provided `.env` file. Instead, it will execute as normal, but without included any custom env vars. *Note: it will still include system and shell vars.*
+- **Bug**: `envkey-cmd` no longer crashes when it cannot find the provided `.env` file. Instead, it will execute as normal, but without included any custom env vars. *Note: it will still include system and shell vars.*
 
 ## 5.1.0
 
@@ -130,7 +134,7 @@ now to support that
 
 ## 2.0.0
 
-- ***BREAKING***: Removed the `-e` and `--env` flags. Now it just expects the first arg to `env-cmd` to be the relative path to the env file: `env-cmd env_file command carg1 carg2`
+- ***BREAKING***: Removed the `-e` and `--env` flags. Now it just expects the first arg to `envkey-cmd` to be the relative path to the env file: `envkey-cmd env_file command carg1 carg2`
 - **Change:** `ParseEnvFile` is now more properly named `ParseEnvString`
 - **Feature:** `ParseEnvString` will ignore comment lines (lines starting with `#`)
 - **Feature:** `ParseEnvString` will ignore empty lines in env file

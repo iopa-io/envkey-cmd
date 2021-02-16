@@ -1,16 +1,10 @@
 export interface GetEnvVarOptions {
-  envFile?: {
-    filePath?: string
-    fallback?: boolean
-  }
-  rc?: {
-    environments: string[]
-    filePath?: string
-  }
+  envKey: string
+  permitted?: string[]
   verbose?: boolean
 }
 
-export interface EnvCmdOptions extends Pick<GetEnvVarOptions, 'envFile' | 'rc'> {
+export interface EnvCmdOptions extends GetEnvVarOptions {
   command: string
   commandArgs: string[]
   options?: {

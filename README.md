@@ -1,17 +1,20 @@
-[![Linux Tests](https://github.com/toddbluhm/envkey-cmd/workflows/linux%20tests/badge.svg)](https://github.com/toddbluhm/envkey-cmd/actions?query=workflow%3A%22linux%20tests%22)
-[![Windows Tests](https://github.com/toddbluhm/envkey-cmd/workflows/windows%20tests/badge.svg)](https://github.com/toddbluhm/envkey-cmd/actions?query=workflow%3A%22windows%20tests%22)
-[![Coverage Status](https://badgen.net/coveralls/c/github/toddbluhm/envkey-cmd)](https://coveralls.io/github/toddbluhm/envkey-cmd?branch=master)
+[![Linux Tests](https://github.com/iopa-io/envkey-cmd/workflows/linux%20tests/badge.svg)](https://github.com/iopa-io/envkey-cmd/actions?query=workflow%3A%22linux%20tests%22)
+[![Windows Tests](https://github.com/iopa-io/envkey-cmd/workflows/windows%20tests/badge.svg)](https://github.com/iopa-io/envkey-cmd/actions?query=workflow%3A%22windows%20tests%22)
+[![Coverage Status](https://badgen.net/coveralls/c/github/iopa-io/envkey-cmd)](https://coveralls.io/github/iopa-io/envkey-cmd?branch=master)
 [![npm](https://badgen.net/npm/v/envkey-cmd)](https://www.npmjs.com/package/envkey-cmd)
 [![npm](https://badgen.net/npm/dm/envkey-cmd)](https://www.npmjs.com/package/envkey-cmd)
-[![License](https://badgen.net/github/license/toddbluhm/envkey-cmd)](https://github.com/toddbluhm/envkey-cmd/blob/master/LICENSE)
+[![License](https://badgen.net/github/license/iopa-io/envkey-cmd)](https://github.com/iopa-io/envkey-cmd/blob/master/LICENSE)
 [![TS-Standard - Typescript Standard Style Guide](https://badgen.net/badge/code%20style/ts-standard/blue?icon=typescript)](https://github.com/toddbluhm/ts-standard)
-[![Dependabot badge](https://badgen.net/dependabot/toddbluhm/envkey-cmd?icon=dependabot)](https://dependabot.com/)
+[![Dependabot badge](https://badgen.net/dependabot/iopa-io/envkey-cmd?icon=dependabot)](https://dependabot.com/)
 
 # envkey-cmd
 
-A simple node program for executing commands using an environment from an env file.
+A simple node program for executing commands using an environment from a given ENVKEY
 
-This is a simple wrapper around ['envkey'](https://www.npmjs.com/package/envkey) with all the logic from ['env-cmd'](https://github.com/toddbluhm/env-cmd)
+Simply set an ENVKEY variable in the existing environment or provide as a command line argument, and then the 
+given child process will be executed will the full environment corresponding to this ENVKEY
+
+This is a simple wrapper around ['envkey'](https://www.npmjs.com/package/envkey) with all the child process spawn logic forked from ['envkey-cmd'](https://github.com/toddbluhm/env-cmd)
 
 ## 💾 Install
 
@@ -19,16 +22,11 @@ This is a simple wrapper around ['envkey'](https://www.npmjs.com/package/envkey)
 
 ## ⌨️ Basic Usage
 
-**Environment file `./.env`**
+**Environment**
 
-```text
-# This is a comment
-ENVKEY=wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-staging.envkey.com
-ENV1=THANKS
-ENV2=FOR ALL
-ENV3=THE FISH
+```yaml
+ENVKEY=wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ
 ```
-
 **Package.json**
 
 ```json
@@ -45,15 +43,7 @@ ENV3=THE FISH
 ./node_modules/.bin/envkey-cmd node index.js
 ```
 
-### Using custom env file path
 
-To use a custom env filename or path, pass the `-f` flag. This is a major breaking change from prior versions < 9.0.0
-
-**Terminal**
-
-```sh
-./node_modules/.bin/envkey-cmd -f ./custom/path/.env node index.js
-```
 
 ## 📜 Help
 
@@ -62,11 +52,9 @@ Usage: _ [options] <command> [...args]
 
 Options:
   -v, --version                       output the version number
-  -e, --environments [env1,env2,...]  The rc file environment(s) to use
-  -f, --file [path]                   Custom env file path (default path: ./.env)
-  --fallback                          Fallback to default env file path, if custom env file path not found
+  -e, --envkey [ENVKEY]               The ENVKEY to use; defaults to process.env.ENVKEY
+  --permitted [var1,var1,...]         whitelist of permitted vars (useful for client-side config) - defaults to  all
   --no-override                       Do not override existing environment variables
-  -r, --rc-file [path]                Custom rc file path (default path: ./.env-cmdrc(|.js|.json)
   --silent                            Ignore any envkey-cmd errors and only fail on executed program failure.
   --use-shell                         Execute the command in a new shell with the given environment
   --verbose                           Print helpful debugging information
@@ -76,53 +64,26 @@ Options:
 
 ## 🔬 Advanced Usage
 
-### `.rc` file usage
-
-For more complex projects, a `.envkey-cmdrc` file can be defined in the root directory and supports
-as many environments as you want. Simply use the `-e` flag and provide which environments you wish to
-use from the `.env-cmdrc` file. Using multiple environment names will merge the environment variables
-together. Later environments overwrite earlier ones in the list if conflicting environment variables
-are found.
-
-**.rc file `./.envkey-cmdrc`**
-
-```json
-{
-  "development": {
-    "ENVKEY": "wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-development.envkey.com",
-    "ENV1": "Thanks",
-    "ENV2": "For All"
-  },
-  "test": {
-    "ENVKEY": "sdfsfsfsdfsdf-3w1kwyF35nRYwsAJ-env-test.envkey.com",
-    "ENV1": "No Thanks",
-    "ENV3": "!"
-  },
-  "production": {
-    "ENVKEY": "wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-production.envkey.com",
-    "ENV1": "The Fish"
-  }
-}
-```
+### Using ENVKEY provided in command line
 
 **Terminal**
 
 ```sh
-./node_modules/.bin/envkey-cmd -e production node index.js
-# Or for multiple environments (where `production` vars override `test` vars,
-# but both are included)
-./node_modules/.bin/envkey-cmd -e test,production node index.js
+./node_modules/.bin/envkey-cmd -e ENVKEY=wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ node index.js
+```
+
+### `--permitted` option
+
+Whitelist of permitted vars (useful for client-side config) - defaults to  all
+
+```sh
+./node_modules/.bin/envkey-cmd -e ENVKEY=wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ --permitted FIREBASE_TOKEN,FIREBASE_URI node index.js
 ```
 
 ### `--no-override` option
 
 Prevents overriding of existing environment variables on `process.env` and within the current
 environment.
-
-### `--fallback` file usage option
-
-If the `.env` file does not exist at the provided custom path, then use the default
-fallback location `./.env` env file instead.
 
 ### `--use-shell`
 
@@ -134,19 +95,6 @@ commands together that share the same environment variables.
 ```sh
 ./node_modules/.bin/envkey-cmd -f ./test/.env --use-shell "npm run lint && npm test"
 ```
-
-### Asynchronous env file support
-   
-   EnvKeyCmd supports reading from asynchronous `.env` files. Instead of using a `.env` file, pass in a `.js`
-   file that exports either an object or a `Promise` resolving to an object (`{ ENV_VAR_NAME: value, ... }`). Asynchronous `.rc`
-   files are also supported using `.js` file extension and resolving to an object with top level environment
-   names (`{ production: { ENV_VAR_NAME: value, ... } }`).
-   
-   **Terminal**
-   
-   ```sh
-   ./node_modules/.bin/envkey-cmd -f ./async-file.js node index.js
-   ```
 
 ### `-x` expands vars in arguments
 
@@ -181,20 +129,44 @@ file might not be present, but still execute the child process without failing
 due to a missing file.
 
 
-## 💿 Examples
+## 💽️ ENVKEYS
+An addition variable ENVKEYS is supplied in the provided environment with the keynames of all
+the variables downloaded from the ENVKEY (filtered to the permitted whitelist if provided).
 
-You can find examples of how to use the various options above by visiting
-the examples repo [envkey-cmd-examples](https://github.com/toddbluhm/envkey-cmd-examples).
+This can be useful for providing to webpack or other utilities that need to know which of the
+process.env variables to use.
 
-## 💽️ Environment File Formats
+```js
+const webpack = require('webpack')
 
-These are the currently accepted environment file formats. If any other formats are desired please create an issue.
+const secretKeys = process.env.ENVKEYS.split(',').reduce((accum, key) => {
+    accum[key] = false
+    return accum
+}, {})
 
-- `.env` as `key=value`
-- `.env.json` Key/value pairs as JSON
-- `.env.js` JavaScript file exporting an `object` or a `Promise` that resolves to an `object`
-- `.env-cmdrc` as valid json or `.env-cmdrc.json` in execution directory with at least one environment `{ "dev": { "key1": "val1" } }`
-- `.env-cmdrc.js` JavaScript file exporting an `object` or a `Promise` that resolves to an `object` that contains at least one environment
+const plugins = [
+    new webpack.EnvironmentPlugin({
+        ...secretKeys,
+        NODE_ENV: process.env.NODE_ENV || 'production'
+    })
+]
+```
+
+
+## 💽️ Environment Files
+
+If you want to provide ENVKEY in an environment file and/or include other environment variables not provided from
+the cloud ENVKEY, then use `env-cmd` right before this program.
+
+**Package.json**
+
+```json
+{
+  "scripts": {
+    "test": "env-cmd -f ../.config/env-secrets.json envkey-cmd mocha -R spec"
+  }
+}
+```
 
 ## 🗂 Path Rules
 
@@ -220,50 +192,46 @@ A function that executes a given command in a new child process with the given e
 - **`options`** { `object` }
   - **`command`** { `string` }: The command to execute (`node`, `mocha`, ...)
   - **`commandArgs`** { `string[]` }: List of arguments to pass to the `command` (`['-R', 'Spec']`)
-  - **`envFile`** { `object` }
-    - **`filePath`** { `string` }: Custom path to .env file to read from (defaults to: `./.env`)
-    - **`fallback`** { `boolean` }: Should fall back to default `./.env` file if custom path does not exist
-  - **`rc`** { `object` }
-    - **`environments`** { `string[]` }: List of environment to read from the `.rc` file
-    - **`filePath`** { `string` }: Custom path to the `.rc` file (defaults to: `./.env-cmdrc(|.js|.json)`)
+  - **`envKey`** { `string` }: The ENVKEY to use (defaults to process.env.ENVKEY)
+  - **`permitted`** { `string[]` }: Whitelist of environment variables to select from the downloaded environment
   - **`options`** { `object` }
     - **`expandEnvs`** { `boolean` }: Expand `$var` values passed to `commandArgs` (default: `false`)
     - **`noOverride`** { `boolean` }: Prevent `.env` file vars from overriding existing `process.env` vars (default: `false`)
     - **`silent`** { `boolean` }: Ignore any errors thrown by envkey-cmd, used to ignore missing file errors (default: `false`)
     - **`useShell`** { `boolean` }: Runs command inside a new shell instance (default: `false`)
     - **`verbose`** { `boolean` }: Prints extra debug logs to `console.info` (default: `false`)
-  - **Returns** { `Promise<object>` }: key is env var name and value is the env var value
+  - **Returns** { `Promise<Record<string, string>>` }: key is env var name and value is the env var value
 
 ### `GetEnvVars`
 
-A function that parses environment variables from a `.env` or a `.rc` file
+A function that parses environment variables from a given ENVKEY
+
+ { envKey: string, permitted?: string[], verbose?: boolean }
 
 - **`options`** { `object` }
-  - **`envFile`** { `object` }
-    - **`filePath`** { `string` }: Custom path to .env file to read from (defaults to: `./.env`)
-    - **`fallback`** { `boolean` }: Should fall back to default `./.env` file if custom path does not exist
-  - **`rc`** { `object` }
-    - **`environments`** { `string[]` }: List of environment to read from the `.rc` file
-    - **`filePath`** { `string` }: Custom path to the `.rc` file (defaults to: `./.env-cmdrc(|.js|.json)`)
+  - **`envKey`** { `string` }: The ENVKEY to use (defaults to process.env.ENVKEY)
+  - **`permitted`** { `string[]` }: Whitelist of environment variables to select from the downloaded environment
   - **`verbose`** { `boolean` }: Prints extra debug logs to `console.info` (default: `false`)
-- **Returns** { `Promise<object>` }: key is env var name and value is the env var value
+- **Returns** { `Promise<Record<string, string>>` }: key is env var name and value is the env var value
 
 ## 🧙 Why
 
-Because sometimes it is just too cumbersome passing a lot of environment variables to scripts. It is
-usually just easier to have a file with all the vars in them, especially for development and testing.
-
-🚨**Do not commit sensitive environment data to a public git repo!** 🚨
+Because scripts shouldnt have to know that the environment variables came from ENVKEY;  they just 
+expect them to be there.     The standard ENVKEY approach requires evaling a shell script from 
+Github or writing a custom node program that calls 'envkey', whereas this is a standard NPM package that
+just works wherever you can execute a shell script.
 
 ## 🧬 Related Projects
 
-[`env-cmd`](https://github.com/toddbluhm/env-cmd) - Original source without ENVKEY
+[`env-cmd`](https://github.com/toddbluhm/envkey-cmd) - Original source without ENVKEY
+[`envkey`](https://github.com/envkey/envkey-node) - The Node wrapper around the ENVKEY cloud fetch logic
+[`envkey-source`](https://github.com/envkey/envkey-source) - The equivalent logic but requires multiple steps to 
+download the script and `eval` it, whereas `envkey-cmd` can just be included as an npm dependency
 [`cross-env`](https://github.com/kentcdodds/cross-env) - Cross platform setting of environment scripts
 
 ## 🎊 Special Thanks
 
-Special thanks to [`env-cmd`](https://github.com/toddbluhm/env-cmd) for all the hard work and [`cross-env`](https://github.com/kentcdodds/cross-env) for inspiration (uses the
-same `cross-spawn` lib underneath too).
+Special thanks to [`envkey-cmd`](https://github.com/toddbluhm/envkey-cmd) for all the hard work, [`envkey`](https://github.com/envkey/envkey-node) for the custom fetch logic that works on multiple platforms, and [`cross-env`](https://github.com/kentcdodds/cross-env) for inspiration (uses the same `cross-spawn` lib underneath too
 
 ## 📋 Contributing Guide
 

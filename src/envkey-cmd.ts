@@ -5,9 +5,6 @@ import { parseArgs } from './parse-args'
 import { getEnvVars } from './get-env-vars'
 import { expandEnvs } from './expand-envs'
 
-// eslint-disable-next-line
-const { fetch: envKeyFetch } = require('envkey/loader')
-
 /**
  * Executes env - cmd using command line arguments
  * @export
@@ -20,7 +17,7 @@ export async function CLI (args: string[]): Promise<{ [key: string]: any }> {
 
   // Run EnvCmd
   try {
-    return await (exports.EnvCmd(parsedArgs) as Promise<{ [key: string]: any }>)
+    return await (exports.EnvKeyCmd(parsedArgs) as Promise<{ [key: string]: any }>)
   } catch (e) {
     console.error(e)
     return process.exit(1)
@@ -28,42 +25,29 @@ export async function CLI (args: string[]): Promise<{ [key: string]: any }> {
 }
 
 /**
- * The main env-cmd program. This will spawn a new process and run the given command using
- * various environment file solutions.
+ * The main envkey-cmd program. This will spawn a new process and run the given command using
+ * then fetched environment for the given ENVKEY.
  *
  * @export
- * @param {EnvCmdOptions} { command, commandArgs, envFile, rc, options }
+ * @param {EnvCmdOptions} { command, commandArgs, envKey, EnvVars, options }
  * @returns {Promise<{ [key: string]: any }>} Returns an object containing [environment variable name]: value
  */
-export async function EnvCmd (
+export async function EnvKeyCmd (
   {
     command,
     commandArgs,
-    envFile,
-    rc,
+    envKey,
+    permitted,
     options = {}
   }: EnvCmdOptions
 ): Promise<{ [key: string]: any }> {
   let env: { [name: string]: string } = {}
   try {
-    env = await getEnvVars({ envFile, rc, verbose: options.verbose })
+    env = await getEnvVars({ envKey, permitted, verbose: options.verbose })
   } catch (e) {
     if (!(options.silent ?? false)) {
       throw e
     }
-  }
-
-  const ENVKEY = process.env.ENVKEY || env.ENVKEY || null
-  if (ENVKEY === null) {
-    if (options.verbose === true) {
-      console.info('Failed to find ENVKEY inside secrets file')
-    }
-  } else {
-    const envDownloaded = envKeyFetch(ENVKEY)
-
-    env = { ...envDownloaded, ...env }
-
-    env.ENVKEY_KEYS = Object.keys(env).join(",")
   }
 
   // Override the merge order if --no-override flag set
@@ -74,7 +58,9 @@ export async function EnvCmd (
     env = Object.assign({}, process.env, env)
   }
 
-  delete env.ENVKEY
+  if ('ENVKEY' in env) {
+    delete env.ENVKEY
+  }
 
   if (options.expandEnvs === true) {
     command = expandEnvs(command, env)

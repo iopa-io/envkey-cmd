@@ -1,6 +1,6 @@
 import { getEnvVars } from './get-env-vars'
 
-// Export the core env-cmd API
+// Export the core envkey-cmd API
 export * from './types'
-export * from './env-cmd'
+export * from './envkey-cmd'
 export const GetEnvVars = getEnvVars

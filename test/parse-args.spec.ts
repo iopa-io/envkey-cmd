@@ -5,10 +5,9 @@ import { parseArgs } from '../src/parse-args'
 
 describe('parseArgs', (): void => {
   const command = 'command'
-  const commandArgs = ['cmda1', 'cmda2', '--cmda3', '-4', 'cmda4', '--fallback']
-  const environments = ['development', 'production']
-  const rcFilePath = './.env-cmdrc'
-  const envFilePath = './.env'
+  const commandArgs = ['cmda1', 'cmda2', '--cmda3', '-4', 'cmda4']
+  const envkey = 'wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-staging.envkey.com'
+  const permitted = ['TEST', 'TEST_9']
   let logInfoStub: sinon.SinonStub<any, any>
 
   before((): void => {
@@ -24,83 +23,44 @@ describe('parseArgs', (): void => {
     sinon.resetBehavior()
   })
 
-  it('should parse environment value', (): void => {
-    const res = parseArgs(['-e', environments[0], command])
-    assert.exists(res.rc)
-    assert.sameOrderedMembers(res.rc!.environments, [environments[0]])
+  it('should parse permitted value', (): void => {
+    const res = parseArgs(['--permitted', permitted.join(','), command])
+    assert.exists(res.permitted)
+    assert.sameOrderedMembers(res.permitted!, permitted)
   })
 
-  it('should parse multiple environment values', (): void => {
-    const res = parseArgs(['-e', environments.join(','), command])
-    assert.exists(res.rc)
-    assert.sameOrderedMembers(res.rc!.environments, environments)
+  it('should parse envkey value', (): void => {
+    const res = parseArgs(['-e', envkey, command])
+    assert.equal(res.envKey, envkey)
   })
-
-  it('should parse command value', (): void => {
-    const res = parseArgs(['-e', environments[0], command])
-    assert.equal(res.command, command)
-  })
-
-  it('should parse multiple command arguments', (): void => {
-    const res = parseArgs(['-e', environments[0], command, ...commandArgs])
-    assert.sameOrderedMembers(res.commandArgs, commandArgs)
-  })
-
-  it('should parse multiple command arguments even if they use the same options flags as env-cmd',
-    (): void => {
-      const commandFlags = ['-f', './other-file', '--use-shell', '-r']
-      const res = parseArgs(['-e', environments[0], command, ...commandFlags])
-      assert.sameOrderedMembers(res.commandArgs, commandFlags)
-      assert.notOk(res.options!.useShell)
-      assert.notOk(res.envFile)
-    }
-  )
 
   it('should parse override option', (): void => {
-    const res = parseArgs(['-e', environments[0], '--no-override', command, ...commandArgs])
+    const res = parseArgs(['-e', envkey, '--no-override', command, ...commandArgs])
     assert.exists(res.options)
     assert.isTrue(res.options!.noOverride)
   })
 
   it('should parse use shell option', (): void => {
-    const res = parseArgs(['-e', environments[0], '--use-shell', command, ...commandArgs])
+    const res = parseArgs(['-e', envkey, '--use-shell', command, ...commandArgs])
     assert.exists(res.options)
     assert.isTrue(res.options!.useShell)
   })
 
-  it('should parse rc file path', (): void => {
-    const res = parseArgs(['-e', environments[0], '-r', rcFilePath, command, ...commandArgs])
-    assert.exists(res.rc)
-    assert.equal(res.rc!.filePath, rcFilePath)
-  })
-
-  it('should parse env file path', (): void => {
-    const res = parseArgs(['-f', envFilePath, command, ...commandArgs])
-    assert.exists(res.envFile)
-    assert.equal(res.envFile!.filePath, envFilePath)
-  })
-
-  it('should parse fallback option', (): void => {
-    const res = parseArgs(['-f', envFilePath, '--fallback', command, ...commandArgs])
-    assert.exists(res.envFile)
-    assert.isTrue(res.envFile!.fallback)
-  })
-
   it('should print to console.info if --verbose flag is passed', (): void => {
-    const res = parseArgs(['-f', envFilePath, '--verbose', command, ...commandArgs])
+    const res = parseArgs(['-e', envkey, '--verbose', command, ...commandArgs])
     assert.exists(res.options!.verbose)
     assert.equal(logInfoStub.callCount, 1)
   })
 
   it('should parse expandEnvs option', (): void => {
-    const res = parseArgs(['-f', envFilePath, '-x', command, ...commandArgs])
-    assert.exists(res.envFile)
+    const res = parseArgs(['-e', envkey, '-x', command, ...commandArgs])
+    assert.exists(res.envKey)
     assert.isTrue(res.options!.expandEnvs)
   })
 
   it('should parse silent option', (): void => {
-    const res = parseArgs(['-f', envFilePath, '--silent', command, ...commandArgs])
-    assert.exists(res.envFile)
+    const res = parseArgs(['-e', envkey, '--silent', command, ...commandArgs])
+    assert.exists(res.envKey)
     assert.isTrue(res.options!.silent)
   })
 })

@@ -42,27 +42,25 @@ export function parseArgs (args: string[]): EnvCmdOptions {
     silent = true
   }
 
-  let rc: any
-  if (program.environments !== undefined && program.environments.length !== 0) {
-    rc = {
-      environments: program.environments,
-      filePath: program.rcFile
-    }
+  let permitted: any
+  if (program.permitted !== undefined && program.permitted.length !== 0) {
+    permitted = program.permitted
   }
 
-  let envFile: any
-  if (program.file !== undefined) {
-    envFile = {
-      filePath: program.file,
-      fallback: program.fallback
-    }
+  let envKey: any
+  if (program.envkey !== undefined) {
+    envKey = program.envkey
+  }
+
+  if ((envKey == null || envKey === undefined) && process.env.ENVKEY !== null && process.env.ENVKEY !== undefined) {
+    envKey = process.env.ENVKEY
   }
 
   const options = {
     command,
     commandArgs,
-    envFile,
-    rc,
+    envKey,
+    permitted,
     options: {
       expandEnvs,
       noOverride,
@@ -82,12 +80,10 @@ export function parseArgsUsingCommander (args: string[]): commander.Command {
   return program
     .version(packageJson.version, '-v, --version')
     .usage('[options] <command> [...args]')
-    .option('-e, --environments [env1,env2,...]', 'The rc file environment(s) to use', parseArgList)
-    .option('-f, --file [path]', 'Custom env file path (default path: ./.env)')
-    .option('--fallback', 'Fallback to default env file path, if custom env file path not found')
+    .option('-e, --envkey [ENVKEY]', 'The ENVKEY to use; defaults to process.env.ENVKEY')
+    .option('--permitted [var1, var2, ...]', 'whitelist of permitted vars (useful for client-side config) - defaults to permitting all if omitted', parseArgList)
     .option('--no-override', 'Do not override existing environment variables')
-    .option('-r, --rc-file [path]', 'Custom rc file path (default path: ./.env-cmdrc(|.js|.json)')
-    .option('--silent', 'Ignore any env-cmd errors and only fail on executed program failure.')
+    .option('--silent', 'Ignore any envkey-cmd errors and only fail on executed program failure.')
     .option('--use-shell', 'Execute the command in a new shell with the given environment')
     .option('--verbose', 'Print helpful debugging information')
     .option('-x, --expand-envs', 'Replace $var in args and command with environment variables')

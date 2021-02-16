@@ -1,7 +1,7 @@
 {
   "name": "envkey-cmd",
-  "version": "10.1.2",
-  "description": "Executes a command using the environment variables from an ENVKEY in an env file",
+  "version": "10.1.5",
+  "description": "Executes a command using the environment variables from a provided ENVKEY",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "engines": {
@@ -44,7 +44,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/toddbluhm/env-cmd/issues"
+    "url": "https://github.com/iopa-io/envkey-cmd/issues"
   },
   "homepage": "https://github.com/iopa-io/envkey-cmd#readme",
   "dependencies": {

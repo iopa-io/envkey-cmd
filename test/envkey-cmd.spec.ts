@@ -5,17 +5,20 @@ import * as parseArgsLib from '../src/parse-args'
 import * as getEnvVarsLib from '../src/get-env-vars'
 import * as expandEnvsLib from '../src/expand-envs'
 import * as spawnLib from '../src/spawn'
-import * as envCmdLib from '../src/env-cmd'
+import * as envKeyCmdLib from '../src/envkey-cmd'
+
+const VALID_ENVKEY = 'wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-staging.envkey.com'
+const INVALID_ENVKEY2 = 'Emzt4BE7C23QtsC7gb1zinvalid-3NvfNiG1Boy6XH2o-env-staging.envkey.com'
 
 describe('CLI', (): void => {
   let sandbox: sinon.SinonSandbox
   let parseArgsStub: sinon.SinonStub<any, any>
-  let envCmdStub: sinon.SinonStub<any, any>
+  let envKeyCmdStub: sinon.SinonStub<any, any>
   let processExitStub: sinon.SinonStub<any, any>
   before((): void => {
     sandbox = sinon.createSandbox()
     parseArgsStub = sandbox.stub(parseArgsLib, 'parseArgs')
-    envCmdStub = sandbox.stub(envCmdLib, 'EnvCmd')
+    envKeyCmdStub = sandbox.stub(envKeyCmdLib, 'EnvKeyCmd')
     processExitStub = sandbox.stub(process, 'exit')
   })
 
@@ -30,24 +33,24 @@ describe('CLI', (): void => {
 
   it('should parse the provided args and execute the EnvCmd', async (): Promise<void> => {
     parseArgsStub.returns({})
-    await envCmdLib.CLI(['node', './env-cmd', '-v'])
+    await envKeyCmdLib.CLI(['node', './envkey-cmd', '-v'])
     assert.equal(parseArgsStub.callCount, 1)
-    assert.equal(envCmdStub.callCount, 1)
+    assert.equal(envKeyCmdStub.callCount, 1)
     assert.equal(processExitStub.callCount, 0)
   })
 
   it('should catch exception if EnvCmd throws an exception', async (): Promise<void> => {
     parseArgsStub.returns({})
-    envCmdStub.throwsException('Error')
-    await envCmdLib.CLI(['node', './env-cmd', '-v'])
+    envKeyCmdStub.throwsException('Error')
+    await envKeyCmdLib.CLI(['node', './envkey-cmd', '-v'])
     assert.equal(parseArgsStub.callCount, 1)
-    assert.equal(envCmdStub.callCount, 1)
+    assert.equal(envKeyCmdStub.callCount, 1)
     assert.equal(processExitStub.callCount, 1)
     assert.equal(processExitStub.args[0][0], 1)
   })
 })
 
-describe('EnvCmd', (): void => {
+describe('EnvKeyCmd', (): void => {
   let sandbox: sinon.SinonSandbox
   let getEnvVarsStub: sinon.SinonStub<any, any>
   let spawnStub: sinon.SinonStub<any, any>
@@ -74,18 +77,11 @@ describe('EnvCmd', (): void => {
   })
 
   it('should parse the provided args and execute the EnvCmd', async (): Promise<void> => {
-    getEnvVarsStub.returns({ BOB: 'test', ENVKEY: 'wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-staging.envkey.com' })
-    await envCmdLib.EnvCmd({
+    getEnvVarsStub.returns({ BOB: 'test' })
+    await envKeyCmdLib.EnvKeyCmd({
       command: 'node',
       commandArgs: ['-v'],
-      envFile: {
-        filePath: './.env',
-        fallback: true
-      },
-      rc: {
-        environments: ['dev'],
-        filePath: './.rc'
-      }
+      envKey: VALID_ENVKEY
     })
     assert.equal(getEnvVarsStub.callCount, 1)
     assert.equal(spawnStub.callCount, 1)
@@ -95,45 +91,28 @@ describe('EnvCmd', (): void => {
     async (): Promise<void> => {
       process.env.BOB = 'cool'
       getEnvVarsStub.returns({
-        BOB: 'test',
-        ENVKEY: 'wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-staging.envkey.com'
+        BOB: 'test'
       })
-      await envCmdLib.EnvCmd({
+      await envKeyCmdLib.EnvKeyCmd({
         command: 'node',
         commandArgs: ['-v'],
-        envFile: {
-          filePath: './.env',
-          fallback: true
-        },
-        rc: {
-          environments: ['dev'],
-          filePath: './.rc'
-        }
+        envKey: VALID_ENVKEY
       })
       assert.equal(getEnvVarsStub.callCount, 1)
       assert.equal(spawnStub.callCount, 1)
       assert.equal(spawnStub.args[0][2].env.BOB, 'test')
-      assert.equal(spawnStub.args[0][2].env.TEST, 'it')
-      assert.equal(spawnStub.args[0][2].env.TEST_2, 'works!')
     }
   )
 
   it('should not override existing env vars if noOverride option is true',
     async (): Promise<void> => {
       process.env.BOB = 'cool'
-      process.env.ENVKEY = 'wYv78UmHsfEu6jSqMZrU-3w1kwyF35nRYwsAJ-env-staging.envkey.com'
+      process.env.ENVKEY = VALID_ENVKEY
       getEnvVarsStub.returns({ BOB: 'test' })
-      await envCmdLib.EnvCmd({
+      await envKeyCmdLib.EnvKeyCmd({
         command: 'node',
         commandArgs: ['-v'],
-        envFile: {
-          filePath: './.env',
-          fallback: true
-        },
-        rc: {
-          environments: ['dev'],
-          filePath: './.rc'
-        },
+        envKey: undefined as unknown as string,
         options: {
           noOverride: true
         }
@@ -141,8 +120,7 @@ describe('EnvCmd', (): void => {
       assert.equal(getEnvVarsStub.callCount, 1)
       assert.equal(spawnStub.callCount, 1)
       assert.equal(spawnStub.args[0][2].env.BOB, 'cool')
-      assert.equal(spawnStub.args[0][2].env.TEST, 'it')
-      assert.equal(spawnStub.args[0][2].env.TEST_2, 'works!')
+      assert.equal(spawnStub.args[0][2].env.ENVKEY, undefined)
     }
   )
 
@@ -150,17 +128,10 @@ describe('EnvCmd', (): void => {
     async (): Promise<void> => {
       process.env.BOB = 'cool'
       getEnvVarsStub.returns({ BOB: 'test' })
-      await envCmdLib.EnvCmd({
+      await envKeyCmdLib.EnvKeyCmd({
         command: 'node',
         commandArgs: ['-v'],
-        envFile: {
-          filePath: './.env',
-          fallback: true
-        },
-        rc: {
-          environments: ['dev'],
-          filePath: './.rc'
-        },
+        envKey: VALID_ENVKEY,
         options: {
           useShell: true
         }
@@ -174,17 +145,10 @@ describe('EnvCmd', (): void => {
   it('should spawn process with command and args expanded if expandEnvs option is true',
     async (): Promise<void> => {
       getEnvVarsStub.returns({ PING: 'PONG', CMD: 'node' })
-      await envCmdLib.EnvCmd({
+      await envKeyCmdLib.EnvKeyCmd({
         command: '$CMD',
         commandArgs: ['$PING', '\\$IP'],
-        envFile: {
-          filePath: './.env',
-          fallback: true
-        },
-        rc: {
-          environments: ['dev'],
-          filePath: './.rc'
-        },
+        envKey: VALID_ENVKEY,
         options: {
           expandEnvs: true
         }
@@ -205,12 +169,10 @@ describe('EnvCmd', (): void => {
     async (): Promise<void> => {
       delete process.env.BOB
       getEnvVarsStub.throws('MissingFile')
-      await envCmdLib.EnvCmd({
+      await envKeyCmdLib.EnvKeyCmd({
         command: 'node',
         commandArgs: ['-v'],
-        envFile: {
-          filePath: './.env'
-        },
+        envKey: INVALID_ENVKEY2,
         options: {
           silent: true
         }
@@ -218,25 +180,6 @@ describe('EnvCmd', (): void => {
       assert.equal(getEnvVarsStub.callCount, 1)
       assert.equal(spawnStub.callCount, 1)
       assert.isUndefined(spawnStub.args[0][2].env.BOB)
-    }
-  )
-
-  it('should allow errors if silent flag not provided',
-    async (): Promise<void> => {
-      getEnvVarsStub.throws('MissingFile')
-      try {
-        await envCmdLib.EnvCmd({
-          command: 'node',
-          commandArgs: ['-v'],
-          envFile: {
-            filePath: './.env'
-          }
-        })
-      } catch (e) {
-        assert.equal(e.name, 'MissingFile')
-        return
-      }
-      assert.fail('Should not get here.')
     }
   )
 })
